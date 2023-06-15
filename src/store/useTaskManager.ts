@@ -47,6 +47,6 @@ const useTaskManager = create<TaskStore>((set) => ({
 
 
 
-export {
+export default {
   useTaskManager
 }

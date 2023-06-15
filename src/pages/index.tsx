@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import useLocalStorage from '../hooks/useLocalStorage';
 import { useRouter } from "next/router";
 
 /**
@@ -17,6 +18,8 @@ const calculateTimeDifference = (server: Date, client: Date): string => {
 export default function Home({ serverTime }: { serverTime: Date }): JSX.Element {
   const [browserTime, setBrowserTime] = useState<Date | null>(null);
   const [timeDifference, setTimeDifference] = useState<string | null>(null);
+
+  const [name, setName] = useLocalStorage<string>('name', '')
   const router = useRouter();
 
   useEffect(() => {
@@ -34,6 +37,10 @@ export default function Home({ serverTime }: { serverTime: Date }): JSX.Element 
       setTimeDifference(difference);
     }
   }, [browserTime, serverTime]);
+
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value);
+  };
 
   const moveToTaskManager = () => {
     router.push("/tasks");
@@ -64,9 +71,13 @@ export default function Home({ serverTime }: { serverTime: Date }): JSX.Element 
           </p>
         </div>
         <div>
+          <input type="text" value={name} onChange={handleNameChange} />
+            <p>{name || 'stranger'}!</p>
+        </div>
+        <div>
           <button onClick={moveToTaskManager}>Go to task manager</button>
         </div>
       </main>
     </>
   );
-}
+};
