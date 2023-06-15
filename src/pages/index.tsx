@@ -1,4 +1,6 @@
 import Head from "next/head";
+import { useEffect, useState } from "react";
+import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/router";
 
 /**
@@ -7,14 +9,36 @@ import { useRouter } from "next/router";
   @param {Date} clientTime - The client time.
   @returns {string} The time difference in the format "{days} days, {hours} hours, {minutes} minutes, {seconds} seconds".
 */
-const calculateTimeDifference = (server: Date, client: Date) => {};
+const calculateTimeDifference = (server: Date, client: Date): string => {
+  const difference = Math.abs(server.getTime() - client.getTime());
+  return formatDistanceToNow(difference, { includeSeconds: true });
+};
 
-
-export default function Home() {
+export default function Home({ serverTime }: { serverTime: Date }): JSX.Element {
+  const [browserTime, setBrowserTime] = useState<Date | null>(null);
+  const [timeDifference, setTimeDifference] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const getTimeFromBrowser = () => {
+      const currentTime = new Date();
+      setBrowserTime(currentTime);
+    };
+
+    getTimeFromBrowser();
+  }, []);
+
+  useEffect(() => {
+    if (browserTime && serverTime) {
+      const difference = calculateTimeDifference(serverTime, browserTime);
+      setTimeDifference(difference);
+    }
+  }, [browserTime, serverTime]);
+
   const moveToTaskManager = () => {
     router.push("/tasks");
-  }
+  };
+
   return (
     <>
       <Head>
@@ -26,19 +50,19 @@ export default function Home() {
       <main>
         <h1>The easiest exam you will ever find</h1>
         <div>
-          {/* Display here the server time (DD-MM-AAAA HH:mm)*/}
           <p>
             Server time:{" "}
-            <span className="serverTime">{/* Replace with the value */}</span>
+            <span className="serverTime">
+              {serverTime.toLocaleString("en-GB")}
+            </span>
           </p>
-
-          {/* Display here the time difference between the server side and the client side */}
           <p>
             Time diff:{" "}
-            <span className="serverTime">{/* Replace with the value */}</span>
+            <span className="serverTime">
+              {timeDifference || "Calculating..."}
+            </span>
           </p>
         </div>
-
         <div>
           <button onClick={moveToTaskManager}>Go to task manager</button>
         </div>
